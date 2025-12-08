@@ -1,0 +1,6 @@
+[submodule "vendor/engine"]
+	path = vendor/engine
+	url = https://github.com/RoyS122/Leaf-Engine.git
+[submodule "vendor/imgui"]
+	path = vendor/imgui
+	url = https://github.com/ocornut/imgui
