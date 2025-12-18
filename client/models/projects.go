@@ -13,7 +13,11 @@ type Project struct {
 	Description string
 	Directory   string
 	Version     Version
-	Rooms       []Room
+
+	// Indexes
+	Rooms       []string
+	GameObjects []string
+	Sprites     []string
 }
 
 func (p Project) CreateProjectDirectory(basePath string) error {
@@ -56,4 +60,28 @@ func LoadProjectFromFile(filePath string) (*Project, error) {
 	p.Directory = filepath.Dir(filePath)
 
 	return &p, nil
+}
+
+func (p *Project) UpdateProject() error {
+	if p.Directory == "" {
+		return fmt.Errorf("project directory is not set")
+	}
+
+	projectFilePath := filepath.Join(p.Directory, "projectdata.ldat")
+
+	file, err := os.Create(projectFilePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	encoder := json.NewEncoder(file)
+	encoder.SetIndent("", "  ") // JSON lisible (optionnel)
+
+	if err := encoder.Encode(p); err != nil {
+		return err
+	}
+
+	fmt.Println("Project updated:", projectFilePath)
+	return nil
 }
