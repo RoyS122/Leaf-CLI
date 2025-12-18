@@ -2,7 +2,7 @@ package ui
 
 import (
 	"fmt"
-	"io"
+	"leafcli/models"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -11,52 +11,87 @@ import (
 )
 
 func CreateWinSelection(a fyne.App) fyne.Window {
-
-	w := a.NewWindow("Project selection")
+	var mainWindow bool = true
+	w := a.NewWindow("LeafCLI: Project selection")
 	w.Resize(fyne.NewSize(900, 600))
-	openProj := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
-		if err != nil {
-			fmt.Println("Error:", err)
+	w.SetOnClosed(func() {
+		if mainWindow {
 			a.Quit()
-			return
 		}
-		if reader == nil {
-			fmt.Println("No file selected")
-			return
-		}
+	})
 
-		fmt.Println("Selected:", reader.URI().Path())
-
-		// Read file content
-		data, err := io.ReadAll(reader)
-		defer reader.Close()
-
-		if err != nil {
-			fmt.Println("Error reading file:", err)
-			a.Quit()
-			return
-		}
-
-		fmt.Println("Content:", string(data))
-
-	}, w)
-
-	hello := widget.NewLabel("Hello Fyne!")
-	input := widget.NewEntry()
-	input.SetPlaceHolder("Enter text...")
-
-	w.SetOnClosed(a.Quit)
-	content := container.NewVBox(
-		hello,
-		input,
-		widget.NewButton("Open Project!", func() {
-			openProj.Show()
-		}),
-		widget.NewButton("New Project", func() {
-			CreateNewProjectWindow(a).Show()
-		}),
+	title := widget.NewLabelWithStyle(
+		"Hello Game Programmer.",
+		fyne.TextAlignCenter,
+		fyne.TextStyle{Bold: true},
 	)
-	w.SetContent(content)
 
+	emptyLabel := widget.NewLabel("Aucun projet récent")
+	emptyLabel.Alignment = fyne.TextAlignCenter
+
+	openButton := widget.NewButton("Open a project", func() {
+		dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
+			defer reader.Close()
+
+			if err != nil {
+				fmt.Println("Error:", err)
+				return
+			}
+			if reader == nil {
+				fmt.Println("No file selected")
+				return
+			}
+
+			p, err := models.LoadProjectFromFile(reader.URI().Path())
+			if err != nil {
+				fmt.Println("Failed to load project:", err)
+				return
+			}
+
+			editorWin := CreateProjectEditor(a, *p)
+			editorWin.Show()
+			mainWindow = false
+			w.Close()
+		}, w).Show()
+	})
+
+	createButton := widget.NewButton("Create a project", func() {
+		np := CreateNewProjectWindow(a)
+		np.Show()
+		np.RequestFocus()
+	})
+
+	createButton.Importance = widget.HighImportance
+
+	buttons := container.NewGridWithColumns(
+		2,
+		openButton,
+		createButton,
+	)
+
+	recentsProjectContent := container.NewVBox(
+		emptyLabel,
+		buttons,
+	)
+
+	recentProjectsSection := Section(
+		"Recent projects",
+		container.NewCenter(recentsProjectContent),
+	)
+
+	content := container.NewBorder(
+		nil,
+		nil,
+		nil,
+		nil,
+		container.NewCenter(
+			container.NewVBox(
+				title,
+				recentProjectsSection,
+			),
+		),
+	)
+
+	w.SetContent(content)
 	return w
 }
