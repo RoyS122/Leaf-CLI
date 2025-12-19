@@ -18,7 +18,7 @@ func (gO GameObject) Save() error {
 	if err := utils.EnsureDir(gO.Directory); err != nil {
 		return err
 	}
-	file, err := os.Create(filepath.Join(gO.Directory, gO.Name+".lgo"))
+	file, err := os.Create(filepath.Join(gO.Directory, "info.lgo"))
 	if err != nil {
 		panic(err)
 	}
