@@ -72,6 +72,14 @@ func CreateProjectEditor(a fyne.App, p models.Project) fyne.Window {
 			fyne.NewMenuItem("Undo", func() {}),
 			fyne.NewMenuItem("Redo", func() {}),
 		),
+		fyne.NewMenu(
+			"Settings",
+			fyne.NewMenuItem("Engine Settings", func() {
+				wsettings := CreateSettingsWindow(a)
+				wsettings.Show()
+				wsettings.RequestFocus()
+			}),
+		),
 	)
 
 	w.SetMainMenu(menu)
@@ -120,7 +128,8 @@ func CreateProjectEditor(a fyne.App, p models.Project) fyne.Window {
 			if scriptSelect.Selected == "" {
 				return
 			}
-			utils.OpenLuaExternal("C:/Users/morga/AppData/Local/Programs/Microsoft VS Code/Code.exe", goj.Scripts[scriptSelect.Selected])
+
+			utils.OpenLuaExternal(models.LoadSettings().CodeEditor, goj.Scripts[scriptSelect.Selected])
 		})
 		editButton.Disable() // désactivé par défaut
 

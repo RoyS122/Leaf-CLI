@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
 func EnsureDir(path string) error {
@@ -23,4 +24,9 @@ func EnsureDir(path string) error {
 
 	// Autre erreur (permissions, etc.)
 	return err
+}
+
+func SettingsPath() string {
+	appData := os.Getenv("APPDATA") // %AppData%
+	return filepath.Join(appData, "LeafCLI", "settings.json")
 }
