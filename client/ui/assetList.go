@@ -56,6 +56,9 @@ func createCategory(edStatus *EditorStatus, assetList *widget.List, p models.Pro
 		case "Sprites":
 			var sp models.Sprite = models.LoadSprites(p.Sprites)[edStatus.selected.id]
 			edStatus.editorPanel.Add(buildGameSpriteEditor(p, w, sp))
+		case "Rooms":
+			var roo models.Room = models.LoadRooms(p.Rooms)[edStatus.selected.id]
+			edStatus.editorPanel.Add(buildRoomEditor(p, w, roo))
 		}
 		edStatus.editorPanel.Refresh()
 	}

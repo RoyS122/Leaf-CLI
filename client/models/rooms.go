@@ -16,7 +16,7 @@ func (r Room) Save() error {
 	if err := utils.EnsureDir(r.Directory); err != nil {
 		return err
 	}
-	file, err := os.Create(filepath.Join(r.Directory, r.Name+".lsp"))
+	file, err := os.Create(filepath.Join(r.Directory, r.Name+".lro"))
 	if err != nil {
 		panic(err)
 	}

@@ -32,6 +32,17 @@ func (gO GameObject) Save() error {
 	return nil
 }
 
+type GOList []GameObject
+
+func (goList GOList) GetGOByName(name string) GameObject {
+	for i, gO := range goList {
+		if gO.Name == name {
+			return goList[i]
+		}
+	}
+	return GameObject{}
+}
+
 func LoadGameObjects(paths []string) (arr []GameObject) {
 	for _, k := range paths {
 		file, err := os.Open(k)

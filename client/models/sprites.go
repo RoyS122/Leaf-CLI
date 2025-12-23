@@ -8,8 +8,8 @@ import (
 )
 
 type Sprite struct {
-	Name, ImagePath, Directory             string
-	Columns, Rows, ImageWidth, ImageHeight uint
+	Name, ImagePath, Directory                        string
+	Columns, Rows, ImageWidth, ImageHeight, AnimSpeed uint
 }
 
 func (s Sprite) Save() error {

@@ -37,7 +37,7 @@ func buildGameSpriteEditor(p models.Project, w fyne.Window, spr models.Sprite) f
 
 	speed := widgets.NewNumberEntry()
 	speed.MinValue = 0
-	speed.Value = 8 // fps par défaut
+	speed.ChangeValue(int(spr.AnimSpeed)) // default value
 
 	var srcImg image.Image
 	var imgcanvas *canvas.Image
@@ -56,8 +56,7 @@ func buildGameSpriteEditor(p models.Project, w fyne.Window, spr models.Sprite) f
 
 		if spr.Columns != 0 {
 
-			columns.Value = int(spr.Columns)
-			columns.Text = fmt.Sprintf("%d", spr.Columns)
+			columns.ChangeValue(int(spr.Columns))
 			imgSliced = utils.SplitImage(srcImg, 1, int(spr.Columns))
 			changeImage(&imgcanvas, imgSliced, 0)
 
@@ -194,6 +193,7 @@ func buildGameSpriteEditor(p models.Project, w fyne.Window, spr models.Sprite) f
 		img.Objects = []fyne.CanvasObject{imageSelect, imgcanvas}
 		img.Refresh()
 
+		spr.AnimSpeed = uint(speed.Value)
 		spr.Name = name.Text
 		spr.Columns = uint(columns.Value)
 

@@ -52,3 +52,14 @@ func NewNumberEntry() *NumberEntry {
 	ne.Text = strconv.Itoa(ne.Value)
 	return ne
 }
+
+func (ne *NumberEntry) ChangeValue(newValue int) {
+	ne.Value = newValue
+	if ne.Value < ne.MinValue {
+		ne.Value = ne.MinValue
+	}
+	if ne.MaxValue != 0 && ne.Value > ne.MaxValue {
+		ne.Value = ne.MaxValue
+	}
+	ne.SetText(strconv.Itoa(ne.Value))
+}
