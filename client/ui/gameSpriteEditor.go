@@ -19,13 +19,6 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func changeImage(imgcanvas **canvas.Image, frames []*image.RGBA, index int) {
-	*imgcanvas = canvas.NewImageFromImage(frames[index])
-	(*imgcanvas).SetMinSize(fyne.NewSize(float32(frames[index].Bounds().Dx()), 64))
-	(*imgcanvas).FillMode = canvas.ImageFillContain
-	(*imgcanvas).ScaleMode = canvas.ImageScalePixels
-}
-
 func buildGameSpriteEditor(p models.Project, w fyne.Window, spr models.Sprite) fyne.CanvasObject {
 	name := widget.NewEntry()
 	name.SetText(spr.Name)
@@ -58,7 +51,7 @@ func buildGameSpriteEditor(p models.Project, w fyne.Window, spr models.Sprite) f
 
 			columns.ChangeValue(int(spr.Columns))
 			imgSliced = utils.SplitImage(srcImg, 1, int(spr.Columns))
-			changeImage(&imgcanvas, imgSliced, 0)
+			utils.ChangeImage(&imgcanvas, imgSliced, 0)
 
 		} else {
 			imgcanvas = canvas.NewImageFromFile(spr.ImagePath)
@@ -121,7 +114,7 @@ func buildGameSpriteEditor(p models.Project, w fyne.Window, spr models.Sprite) f
 			}
 			imgSliced = utils.SplitImage(srcImg, 1, int(spr.Columns))
 
-			changeImage(&imgcanvas, imgSliced, 0)
+			utils.ChangeImage(&imgcanvas, imgSliced, 0)
 
 			// Mettre à jour le conteneur avec la nouvelle image
 
@@ -161,7 +154,7 @@ func buildGameSpriteEditor(p models.Project, w fyne.Window, spr models.Sprite) f
 				if elapsed >= frameDuration {
 					elapsed -= frameDuration
 					frameIndex = (frameIndex + 1) % len(imgSliced)
-					changeImage(&imgcanvas, imgSliced, frameIndex)
+					utils.ChangeImage(&imgcanvas, imgSliced, frameIndex)
 
 					img.Objects = []fyne.CanvasObject{imageSelect, imgcanvas}
 					fyne.Do(img.Refresh)
@@ -187,7 +180,7 @@ func buildGameSpriteEditor(p models.Project, w fyne.Window, spr models.Sprite) f
 		fmt.Println("spr.Columns: ", spr.Columns)
 
 		imgSliced = utils.SplitImage(srcImg, 1, int(columns.Value))
-		changeImage(&imgcanvas, imgSliced, 0)
+		utils.ChangeImage(&imgcanvas, imgSliced, 0)
 
 		// Mettre à jour le conteneur avec la nouvelle image
 		img.Objects = []fyne.CanvasObject{imageSelect, imgcanvas}

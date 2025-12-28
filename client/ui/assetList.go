@@ -12,12 +12,13 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func createCategory(edStatus *EditorStatus, assetList *widget.List, p models.Project, w fyne.Window, name string) fyne.CanvasObject {
+func createCategory(edStatus *EditorStatus, categories []*widget.List, p models.Project, w fyne.Window, name string) fyne.CanvasObject {
 
+	var categorie_created int = -1
 	switch name {
 	case "GameObjects":
-
-		assetList = widget.NewList(
+		categorie_created = 0
+		categories[0] = widget.NewList(
 			func() int { return len(p.GameObjects) },
 			func() fyne.CanvasObject { return widget.NewLabel("Asset") },
 			func(i widget.ListItemID, o fyne.CanvasObject) {
@@ -26,7 +27,8 @@ func createCategory(edStatus *EditorStatus, assetList *widget.List, p models.Pro
 		)
 
 	case "Sprites":
-		assetList = widget.NewList(
+		categorie_created = 1
+		categories[1] = widget.NewList(
 			func() int { return len(p.Sprites) },
 			func() fyne.CanvasObject { return widget.NewLabel("Asset") },
 			func(i widget.ListItemID, o fyne.CanvasObject) {
@@ -35,7 +37,8 @@ func createCategory(edStatus *EditorStatus, assetList *widget.List, p models.Pro
 		)
 
 	case "Rooms":
-		assetList = widget.NewList(
+		categorie_created = 2
+		categories[2] = widget.NewList(
 			func() int { return len(p.Rooms) },
 			func() fyne.CanvasObject { return widget.NewLabel("Asset") },
 			func(i widget.ListItemID, o fyne.CanvasObject) {
@@ -44,25 +47,42 @@ func createCategory(edStatus *EditorStatus, assetList *widget.List, p models.Pro
 			},
 		)
 	}
-	assetList.OnSelected = func(id widget.ListItemID) {
+	categories[categorie_created].OnSelected = func(id widget.ListItemID) {
+		fmt.Println("Selected", name, "ID:", id)
+
 		edStatus.selected.cat = name
 		edStatus.selected.id = id
-		edStatus.editorPanel.Objects = nil // clear
 
-		switch edStatus.selected.cat {
-		case "GameObjects":
-			var gO models.GameObject = models.LoadGameObjects(p.GameObjects)[edStatus.selected.id]
-			edStatus.editorPanel.Add(buildGameObjectEditor(p, w, gO))
-		case "Sprites":
-			var sp models.Sprite = models.LoadSprites(p.Sprites)[edStatus.selected.id]
-			edStatus.editorPanel.Add(buildGameSpriteEditor(p, w, sp))
-		case "Rooms":
-			var roo models.Room = models.LoadRooms(p.Rooms)[edStatus.selected.id]
-			edStatus.editorPanel.Add(buildRoomEditor(p, w, roo))
-		}
+		// Clear editor
+		edStatus.editorPanel.RemoveAll()
 		edStatus.editorPanel.Refresh()
+
+		switch name {
+		case "GameObjects":
+			gO := models.LoadGameObjects(p.GameObjects)[id]
+			edStatus.editorPanel.Add(buildGameObjectEditor(p, w, gO))
+			categories[1].UnselectAll()
+			categories[2].UnselectAll()
+
+		case "Sprites":
+			sp := models.LoadSprites(p.Sprites)[id]
+			edStatus.editorPanel.Add(buildGameSpriteEditor(p, w, sp))
+			categories[0].UnselectAll()
+			categories[2].UnselectAll()
+
+		case "Rooms":
+			roo := models.LoadRooms(p.Rooms)[id]
+			edStatus.editorPanel.Add(buildRoomEditor(p, w, roo))
+			categories[0].UnselectAll()
+			categories[1].UnselectAll()
+		}
+
+		edStatus.editorPanel.Refresh()
+		fmt.Println("edStatus.selected:", edStatus.selected)
+
 	}
-	scroll := container.NewVScroll(assetList)
+
+	scroll := container.NewVScroll(categories[categorie_created])
 	scroll.SetMinSize(fyne.NewSize(200, 120)) // hauteur par défaut
 
 	scroll.Hide() // Liste cachée au départ
@@ -77,7 +97,7 @@ func createCategory(edStatus *EditorStatus, assetList *widget.List, p models.Pro
 				sp.Directory = filepath.Join(p.Directory, "Sprites", sp.Name)
 				sp.Columns = 1
 				utils.EnsureDir(sp.Directory)
-				p.Sprites = append(p.Sprites, filepath.Join(sp.Directory, sp.Name+".lsp"))
+				p.Sprites = append(p.Sprites, filepath.Join(sp.Directory, "info.lsp"))
 
 				sp.Save()
 				fmt.Println("Create sprite:", assetName)

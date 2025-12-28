@@ -3,6 +3,9 @@ package utils
 import (
 	"image"
 	"image/draw"
+
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 )
 
 func SplitImage(srcIMG image.Image, rows, cols int) (image_splited []*image.RGBA) {
@@ -23,4 +26,12 @@ func SplitImage(srcIMG image.Image, rows, cols int) (image_splited []*image.RGBA
 		}
 	}
 	return image_splited
+}
+
+func ChangeImage(imgcanvas **canvas.Image, frames []*image.RGBA, index int) {
+	*imgcanvas = canvas.NewImageFromImage(frames[index])
+	(*imgcanvas).SetMinSize(fyne.NewSize(float32(frames[index].Bounds().Dx()), 64))
+	(*imgcanvas).FillMode = canvas.ImageFillContain
+	(*imgcanvas).ScaleMode = canvas.ImageScalePixels
+	(*imgcanvas).Resize(fyne.NewSize(float32(frames[index].Bounds().Dx()), 64))
 }

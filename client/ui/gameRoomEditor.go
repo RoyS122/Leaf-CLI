@@ -60,10 +60,14 @@ func buildRoomEditor(p models.Project, w fyne.Window, room models.Room) fyne.Can
 		gObjNames = append(gObjNames, gObj.Name)
 	}
 
+	viewport := widgets.NewRoomViewport(&room)
+
 	addInstanceButton := widget.NewButton("Add Instance", func() {
 		ShowAddObjectInstance(w, gameObjects, func(selected string) {
 			var gameobjectslist models.GOList = gameObjects
 			room.GOInstances = append(room.GOInstances, models.NewInstanceFromGO(gameobjectslist.GetGOByName(selected), 0, 0))
+			viewport.Reload()
+
 			fmt.Println("Added instance of:", selected)
 			room.Save()
 		})
@@ -76,7 +80,6 @@ func buildRoomEditor(p models.Project, w fyne.Window, room models.Room) fyne.Can
 		}
 	})
 
-	viewport := widgets.BuildRoomViewport(room)
 	form := widget.NewForm(
 		widget.NewFormItem("Name", name),
 		widget.NewFormItem("Instances", addInstanceButton),

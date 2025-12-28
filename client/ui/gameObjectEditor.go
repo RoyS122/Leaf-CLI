@@ -85,7 +85,13 @@ func buildGameObjectEditor(p models.Project, w fyne.Window, goj models.GameObjec
 		),
 		widget.NewButton("Save", func() {
 			goj.Name = name.Text
-			goj.Sprite = selectField.Selected
+			sprName := selectField.Selected
+			for _, spr := range sprites {
+				if spr.Name == sprName {
+					goj.Sprite = filepath.Join(spr.Directory, "info.lsp")
+					break
+				}
+			}
 			goj.Save()
 		}),
 	)

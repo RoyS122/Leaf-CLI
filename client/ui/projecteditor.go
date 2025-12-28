@@ -79,12 +79,15 @@ func CreateProjectEditor(a fyne.App, p models.Project) fyne.Window {
 	)
 	edStatus.editorPanel = *editorPanel
 
-	var assetList *widget.List
-
+	var categories []*widget.List
+	for i := 0; i < 3; i++ {
+		var assetList *widget.List
+		categories = append(categories, assetList)
+	}
 	// ---- Categories
-	spritesCat := createCategory(&edStatus, assetList, p, w, "Sprites")
-	gameObjectsCat := createCategory(&edStatus, assetList, p, w, "GameObjects")
-	roomsCat := createCategory(&edStatus, assetList, p, w, "Rooms")
+	spritesCat := createCategory(&edStatus, categories, p, w, "Sprites")
+	gameObjectsCat := createCategory(&edStatus, categories, p, w, "GameObjects")
+	roomsCat := createCategory(&edStatus, categories, p, w, "Rooms")
 
 	leftPanel := container.NewVBox(
 		spritesCat,

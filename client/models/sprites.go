@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
 	"leafcli/utils"
 	"os"
 	"path/filepath"
@@ -16,7 +17,7 @@ func (s Sprite) Save() error {
 	if err := utils.EnsureDir(s.Directory); err != nil {
 		return err
 	}
-	file, err := os.Create(filepath.Join(s.Directory, s.Name+".lsp"))
+	file, err := os.Create(filepath.Join(s.Directory, "info.lsp"))
 	if err != nil {
 		panic(err)
 	}
@@ -50,4 +51,23 @@ func LoadSprites(paths []string) (arr []Sprite) {
 	}
 
 	return arr
+}
+
+func LoadSpriteFromFile(filePath string) (Sprite, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		fmt.Println("Error opening sprite file: ", filePath)
+		return Sprite{}, err
+	}
+	defer file.Close()
+
+	var s Sprite
+	decoder := json.NewDecoder(file)
+	if err := decoder.Decode(&s); err != nil {
+		return Sprite{}, err
+	}
+
+	// S'assurer que le champ Directory est correct
+	s.Directory = filepath.Dir(filePath)
+	return s, nil
 }

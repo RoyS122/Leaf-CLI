@@ -10,33 +10,48 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func BuildRoomViewport(r models.Room) fyne.CanvasObject {
+// RoomViewport gère l'affichage d'une Room et de ses instances
+type RoomViewport struct {
+	widget.BaseWidget
+	room *models.Room
+	root *fyne.Container // racine stable
+}
+
+// NewRoomViewport crée un RoomViewport pour la room donnée
+func NewRoomViewport(room *models.Room) *RoomViewport {
+	root := container.NewWithoutLayout()
+	rv := &RoomViewport{
+		room: room,
+		root: root,
+	}
+	rv.ExtendBaseWidget(rv)
+	rv.Reload() // remplir le root
+	return rv
+}
+
+// Reload reconstruit le contenu du viewport
+func (r *RoomViewport) Reload() {
 	const (
-		roomWidth  = 500
-		roomHeight = 300
+		roomWidth  = 512
+		roomHeight = 288
 		gridSize   = 32
 	)
 
-	// Fond de la room
-	background := canvas.NewRectangle(color.NRGBA{R: 40, G: 40, B: 40, A: 255})
-	background.Resize(fyne.NewSize(roomWidth, roomHeight))
+	objects := []fyne.CanvasObject{}
 
-	objects := []fyne.CanvasObject{
-		background,
-	}
+	// Fond
+	bg := canvas.NewRectangle(color.NRGBA{R: 40, G: 40, B: 40, A: 255})
+	bg.Resize(fyne.NewSize(roomWidth, roomHeight))
+	objects = append(objects, bg)
 
-	// Couleur de la grille (légèrement transparente)
+	// Grille
 	gridColor := color.NRGBA{R: 255, G: 255, B: 255, A: 40}
-
-	// Lignes verticales
 	for x := gridSize; x < roomWidth; x += gridSize {
 		line := canvas.NewLine(gridColor)
 		line.Position1 = fyne.NewPos(float32(x), 0)
 		line.Position2 = fyne.NewPos(float32(x), roomHeight)
 		objects = append(objects, line)
 	}
-
-	// Lignes horizontales
 	for y := gridSize; y < roomHeight; y += gridSize {
 		line := canvas.NewLine(gridColor)
 		line.Position1 = fyne.NewPos(0, float32(y))
@@ -44,29 +59,26 @@ func BuildRoomViewport(r models.Room) fyne.CanvasObject {
 		objects = append(objects, line)
 	}
 
-	// Conteneur libre
-	roomContent := container.NewWithoutLayout(objects...)
-	roomContent.Resize(fyne.NewSize(roomWidth, roomHeight))
-
-	// Padding extérieur (optionnel)
-	return container.NewPadded(roomContent)
-}
-
-type RoomViewport struct {
-	widget.BaseWidget
-	content fyne.CanvasObject
-}
-
-func NewRoomViewport(room models.Room) *RoomViewport {
-	rv := &RoomViewport{
-		content: BuildRoomViewport(room),
+	// Instances
+	for i := range r.room.GOInstances {
+		inst := &r.room.GOInstances[i]
+		w := NewInstanceWidget(inst)
+		if w != nil {
+			w.OnSelected = func(i *models.Instance) {}
+			w.OnRoomUpdateinstance = func() { r.room.Save() }
+			objects = append(objects, w)
+		}
 	}
-	rv.ExtendBaseWidget(rv)
-	return rv
+
+	// Mettre à jour le contenu du root existant
+	r.root.Objects = objects
+	r.root.Refresh()
+	r.BaseWidget.Refresh()
 }
 
+// Implémentation du renderer
 func (r *RoomViewport) CreateRenderer() fyne.WidgetRenderer {
-	return widget.NewSimpleRenderer(r.content)
+	return widget.NewSimpleRenderer(r.root)
 }
 
 func (r *RoomViewport) MinSize() fyne.Size {
