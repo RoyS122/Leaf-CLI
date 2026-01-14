@@ -11,5 +11,6 @@ func main() {
 	a := app.NewWithID("fr.roys.leaf")
 
 	w := ui.CreateWinSelection(a)
+
 	w.ShowAndRun()
 }

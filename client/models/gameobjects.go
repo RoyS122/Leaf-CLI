@@ -64,3 +64,16 @@ func LoadGameObjects(paths []string) (arr []GameObject) {
 
 	return arr
 }
+
+func LoadGameObject(path string) (gO GameObject) {
+
+	file, err := os.Open(path)
+	if err != nil {
+		return gO
+	}
+	decoder := json.NewDecoder(file)
+	if err := decoder.Decode(&gO); err != nil {
+		return gO
+	}
+	return gO
+}

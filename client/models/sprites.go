@@ -14,6 +14,7 @@ type Sprite struct {
 }
 
 func (s Sprite) Save() error {
+	fmt.Println("save called for sprite: ", s)
 	if err := utils.EnsureDir(s.Directory); err != nil {
 		return err
 	}

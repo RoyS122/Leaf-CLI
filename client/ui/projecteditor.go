@@ -57,6 +57,9 @@ func CreateProjectEditor(a fyne.App, p models.Project) fyne.Window {
 			fyne.NewMenuItem("Open Project", func() {
 				fmt.Println("Open project")
 			}),
+			fyne.NewMenuItem("Compile Project", func() {
+				p.Compile()
+			}),
 		),
 		fyne.NewMenu(
 			"Edit",

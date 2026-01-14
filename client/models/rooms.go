@@ -51,3 +51,16 @@ func LoadRooms(paths []string) (arr []Room) {
 
 	return arr
 }
+
+func LoadRoom(path string) (r Room) {
+	file, err := os.Open(path)
+	if err != nil {
+		return
+	}
+
+	decoder := json.NewDecoder(file)
+	if err := decoder.Decode(&r); err != nil {
+		return
+	}
+	return r
+}
