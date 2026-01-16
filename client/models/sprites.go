@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"leafcli/utils"
 	"os"
 	"path/filepath"
@@ -52,6 +53,38 @@ func LoadSprites(paths []string) (arr []Sprite) {
 	}
 
 	return arr
+}
+
+func (s Sprite) GetCompiledPath(buildPath string) string {
+	return filepath.Join(buildPath, "Sprites", s.Name, filepath.Base(s.ImagePath))
+}
+
+func CopySpritesAssets(paths []string, destPath string) error {
+	sprites := LoadSprites(paths)
+	for _, spr := range sprites {
+		var relativeSpritePath string = filepath.Join(destPath, spr.Name)
+		var relativeSpriteFilePath string = filepath.Join(relativeSpritePath, filepath.Base(spr.ImagePath))
+		if err := utils.EnsureDir(relativeSpritePath); err != nil {
+			return err
+		}
+		// var fileIn, fileOut *os.File
+		fileIn, err := os.Open(spr.ImagePath)
+		if err != nil {
+			return err
+		}
+		defer fileIn.Close()
+
+		fileOut, err := os.Create(relativeSpriteFilePath)
+		if err != nil {
+			return err
+		}
+		defer fileOut.Close()
+
+		if _, err := io.Copy(fileOut, fileIn); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func LoadSpriteFromFile(filePath string) (Sprite, error) {

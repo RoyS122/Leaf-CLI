@@ -11,6 +11,7 @@ import (
 )
 
 const ENGINE_SOURCE_DIR = "C:/Users/morga/git/Leaf-CLI/vendor/engine"
+const BUILD_DIR = "Build"
 
 type Project struct {
 	Name        string
@@ -130,11 +131,15 @@ func (p Project) Compile() error {
 		builder.WriteString(p.CompileRoom(LoadRoom(r)))
 	}
 
-	buildPath := filepath.Join(p.Directory, "build")
+	buildPath := filepath.Join(p.Directory, BUILD_DIR)
 	compilation.BuildEngine(ENGINE_SOURCE_DIR, buildPath)
 	if err := os.MkdirAll(buildPath, 0755); err != nil {
 		return fmt.Errorf("impossible de créer le dossier build: %w", err)
 	}
+
+	spritesPath := filepath.Join(buildPath, "Sprites")
+
+	CopySpritesAssets(p.Sprites, spritesPath)
 
 	filePath := filepath.Join(buildPath, "game.lua")
 	err := os.WriteFile(filePath, []byte(builder.String()), 0644)
@@ -163,14 +168,18 @@ func (p Project) CompileInstance(r Room, i Instance, insID uint) string {
 	Gobj := LoadGameObject(i.Parent)
 	var gobj_id string = fmt.Sprintf("ins_%s_%d", Gobj.Name, insID)
 	builder.WriteString(fmt.Sprintf("local %s = Engine.create_gameobject(%s, %d, %d)\n", gobj_id, r.Name, i.X, i.Y))
+
+	buildpath := filepath.Join(p.Directory, BUILD_DIR)
+	fmt.Println("test build path here: ", buildpath)
 	if Gobj.Sprite != "" {
 		spr, err := LoadSpriteFromFile(Gobj.Sprite)
 		if err != nil {
 			fmt.Println(err)
 			return builder.String()
 		}
-		safeSpritePath := strings.ReplaceAll(spr.ImagePath, "\\", "/") // On remplace \ par /
 
+		SpriteCompiledPath := spr.GetCompiledPath(buildpath) // On remplace \ par /
+		SpriteSafePath := strings.Replace(SpriteCompiledPath, "\\", "/", -1)
 		if spr.Rows == 0 {
 			spr.Rows = 1
 		}
@@ -178,11 +187,11 @@ func (p Project) CompileInstance(r Room, i Instance, insID uint) string {
 		if spr.Columns == 0 {
 			spr.Columns = 1
 		}
-
+		fmt.Println("Writted this sprite: ", spr)
 		builder.WriteString(fmt.Sprintf(
 			"%s:setSprite(\"%s\", %d, %d, %d, %d, %d)\n",
 			gobj_id,
-			safeSpritePath,
+			SpriteSafePath,
 			spr.ImageWidth,
 			spr.ImageHeight,
 			spr.Columns,
