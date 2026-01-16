@@ -31,7 +31,6 @@ func CreateWinSelection(a fyne.App) fyne.Window {
 
 	openButton := widget.NewButton("Open a project", func() {
 		dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
-			defer reader.Close()
 
 			if err != nil {
 				fmt.Println("Error:", err)
@@ -41,17 +40,17 @@ func CreateWinSelection(a fyne.App) fyne.Window {
 				fmt.Println("No file selected")
 				return
 			}
-
+			defer reader.Close()
 			p, err := models.LoadProjectFromFile(reader.URI().Path())
 			if err != nil {
 				fmt.Println("Failed to load project:", err)
 				return
 			}
-
 			editorWin := CreateProjectEditor(a, *p)
 			editorWin.Show()
 			mainWindow = false
 			w.Close()
+
 		}, w).Show()
 	})
 
